@@ -65,10 +65,12 @@ export function QuestCard({ quest, onEdit, onDelete }: QuestCardProps) {
       broadcastReward({
         xp: quest.xpReward,
         gold: quest.goldReward,
-        streak: res.newStreak,
+        attribute: quest.attribute,
+        attributeGain: 1,
+        streak: res.currentStreak,
         leveledUp: res.leveledUp,
         newLevel: res.newLevel,
-        bonusGold: res.bonusGold,
+        bonusGold: 0,
       });
     } catch (err) {
       setFloatingBonus(null);

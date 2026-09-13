@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Mail, Lock, Eye, EyeOff, Zap, ArrowRight, Sun, Moon } from "lucide-react";
+import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, Sun, Moon } from "lucide-react";
+import { login } from "@/lib/auth";
 import { api } from "@/lib/api-client";
 import { playSound } from "@/lib/sound";
 import { useAppPreferences } from "@/components/providers";
@@ -20,26 +21,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDemoFill = async () => {
-    playSound("click");
-    setEmail("agent@liferpg.io");
-    setPassword("Password123!");
-    setIsLoading(true);
-    setError(null);
-    try {
-      await api.post("/api/auth/login", {
-        email: "agent@liferpg.io",
-        password: "Password123!",
-      });
-
-      playSound("levelup");
-      router.push("/dashboard");
-    } catch {
-      setError("Demo credentials rejected. Please try standard login.");
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -47,11 +28,8 @@ export default function LoginPage() {
     playSound("click");
 
     try {
-      await api.post("/api/auth/login", {
-        email,
-        password,
-      });
-
+      await login(email, password);
+      await api.post("/api/auth/init-profile");
       playSound("levelup");
       router.push("/dashboard");
     } catch (err: unknown) {
@@ -64,18 +42,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col items-center justify-center p-4 selection:bg-[var(--primary)] selection:text-[#FFFFFF] relative overflow-hidden transition-colors duration-200">
-      {/* Ambient radial glow – sits below card */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--primary)]/15 rounded-full blur-3xl pointer-events-none" style={{ zIndex: 1 }} />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[var(--accent-active)]/12 rounded-full blur-3xl pointer-events-none" style={{ zIndex: 1 }} />
 
-      {/* Main Login Card */}
       <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-panel)] backdrop-blur-xl p-6 sm:p-8 shadow-2xl transition-colors duration-200" style={{ zIndex: 10 }}>
-        {/* Top bar with quick theme toggle */}
         <div className="flex items-center justify-between mb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 group"
-          >
+          <Link href="/" className="inline-flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[var(--primary)] via-[var(--accent-active)] to-[var(--gold)] p-0.5 shadow-md group-hover:scale-105 transition-transform">
               <div className="w-full h-full bg-[var(--surface-panel)] rounded-[10px] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-[var(--accent-active)]" />
@@ -90,18 +62,12 @@ export default function LoginPage() {
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title={isLight ? "Switch to Dark Theme" : "Switch to Light Theme"}
             className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent-active)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
           >
-            {isLight ? (
-              <Sun className="w-4 h-4 text-[var(--primary)]" />
-            ) : (
-              <Moon className="w-4 h-4 text-[var(--accent-active)]" />
-            )}
+            {isLight ? <Sun className="w-4 h-4 text-[var(--primary)]" /> : <Moon className="w-4 h-4 text-[var(--accent-active)]" />}
           </button>
         </div>
 
-        {/* Brand Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-black font-mono tracking-tight text-[var(--text-primary)]">
             NEURAL AUTHENTICATION
@@ -111,36 +77,15 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* 1-Click Demo Shortcut */}
-        <div className="mb-6">
-          <button
-            type="button"
-            onClick={handleDemoFill}
-            disabled={isLoading}
-            className="w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-[var(--primary)]/10 border border-[var(--primary)]/40 text-[var(--accent-active)] hover:bg-[var(--primary)]/20 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-          >
-            <Zap className="w-3.5 h-3.5 text-[var(--accent-active)]" />
-            <span>1-Click Demo Login (agent@liferpg.io)</span>
-          </button>
-        </div>
-
-        {/* Error Alert */}
         {error && (
-          <div
-            role="alert"
-            className="p-3.5 rounded-xl bg-[var(--error)]/15 border border-[var(--error)]/40 text-[var(--error)] text-xs mb-5 animate-in fade-in"
-          >
+          <div role="alert" className="p-3.5 rounded-xl bg-[var(--error)]/15 border border-[var(--error)]/40 text-[var(--error)] text-xs mb-5 animate-in fade-in">
             ⚠ {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="email"
-              className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5"
-            >
+            <label htmlFor="email" className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               Operative Email *
             </label>
             <div className="relative">
@@ -158,14 +103,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label
-                htmlFor="password"
-                className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)]"
-              >
-                Security Key (Password) *
-              </label>
-            </div>
+            <label htmlFor="password" className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5 block">
+              Security Key (Password) *
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -183,38 +123,18 @@ export default function LoginPage() {
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
               >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Primary Submit Button: Orange on Light, Specular Violet on Dark */}
           {isLight ? (
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full py-3 px-4 rounded-xl text-sm font-mono font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md mt-2"
-            >
+            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 px-4 rounded-xl text-sm font-mono font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md mt-2">
               <span>{isLoading ? "Synchronizing Uplink..." : "Connect Neural Link"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <SpecularButton
-              type="submit"
-              disabled={isLoading}
-              size="md"
-              radius={12}
-              lineColor="#A855F7"
-              baseColor="#6D28D9"
-              textColor="#F8FAFC"
-              intensity={1.2}
-              autoAnimate
-              className="w-full mt-2"
-            >
+            <SpecularButton type="submit" disabled={isLoading} size="md" radius={12} lineColor="#A855F7" baseColor="#6D28D9" textColor="#F8FAFC" intensity={1.2} autoAnimate className="w-full mt-2">
               <span className="flex items-center justify-center gap-2">
                 <span>{isLoading ? "Synchronizing Uplink..." : "Connect Neural Link"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -223,13 +143,9 @@ export default function LoginPage() {
           )}
         </form>
 
-        {/* Footer */}
         <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] text-center text-xs text-[var(--text-muted)]">
           New to the guild?{" "}
-          <Link
-            href="/signup"
-            className="text-[var(--accent-active)] hover:underline font-bold font-mono"
-          >
+          <Link href="/signup" className="text-[var(--accent-active)] hover:underline font-bold font-mono">
             Initialize Operative Registration
           </Link>
         </div>

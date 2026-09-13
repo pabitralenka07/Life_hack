@@ -11,6 +11,7 @@ export interface CharacterState {
   id: string;
   userId: string;
   username: string;
+  email?: string;
   avatarUrl: string;
   level: number;
   currentXP: number;

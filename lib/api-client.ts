@@ -1,3 +1,7 @@
+import { auth } from "@/lib/firebase";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 export class ApiError extends Error {
   status: number;
   data: unknown;
@@ -20,7 +24,7 @@ export async function apiClient<T>(
 ): Promise<T> {
   const { params, headers, ...customConfig } = options;
 
-  let url = endpoint;
+  let url = `${API_BASE_URL}${endpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => {
@@ -34,8 +38,12 @@ export async function apiClient<T>(
     }
   }
 
+  const currentUser = auth.currentUser;
+  const idToken = currentUser ? await currentUser.getIdToken() : null;
+
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
+    ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
   };
 
   const config: RequestInit = {
@@ -44,7 +52,6 @@ export async function apiClient<T>(
       ...defaultHeaders,
       ...headers,
     },
-    credentials: "same-origin",
   };
 
   let response: Response;
@@ -60,7 +67,6 @@ export async function apiClient<T>(
 
   if (response.status === 401) {
     if (typeof window !== "undefined") {
-      // Avoid redirect loops if already on login or signup or landing
       const currentPath = window.location.pathname;
       if (
         currentPath !== "/login" &&

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import { QuestItem, QuestCompletionResponse } from "@/types";
+import { QuestItem } from "@/types";
 
 interface QuestFilters {
   [key: string]: string | number | boolean | undefined;
@@ -15,44 +15,37 @@ interface QuestFilters {
 export function useQuests(filters: QuestFilters = {}) {
   const queryClient = useQueryClient();
 
-  const query = useQuery<{ success: boolean; quests: QuestItem[] }>({
+  const query = useQuery<QuestItem[]>({
     queryKey: ["quests", filters],
-    queryFn: () => api.get("/api/quests", filters),
+    queryFn: () => api.get("/api/tasks", filters),
   });
 
-  // Create Quest Mutation
   const createMutation = useMutation({
     mutationFn: (newQuest: Partial<QuestItem>) =>
-      api.post<{ success: boolean; quest: QuestItem }>("/api/quests", newQuest),
+      api.post<{ id: string }>("/api/tasks", newQuest),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quests"] });
     },
   });
 
-  // Update Quest Mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<QuestItem>) =>
-      api.patch<{ success: boolean; quest: QuestItem }>(`/api/quests/${id}`, data),
+      api.put<{ success: boolean }>(`/api/tasks/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quests"] });
     },
   });
 
-  // Delete Quest Mutation with optimistic removal
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/api/quests/${id}`),
+    mutationFn: (id: string) => api.delete<{ success: boolean }>(`/api/tasks/${id}`),
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: ["quests"] });
-      const previousQuests = queryClient.getQueryData<{ success: boolean; quests: QuestItem[] }>([
-        "quests",
-        filters,
-      ]);
-
+      const previousQuests = queryClient.getQueryData<QuestItem[]>(["quests", filters]);
       if (previousQuests) {
-        queryClient.setQueryData(["quests", filters], {
-          ...previousQuests,
-          quests: previousQuests.quests.filter((q) => q.id !== deletedId),
-        });
+        queryClient.setQueryData(
+          ["quests", filters],
+          previousQuests.filter((q) => q.id !== deletedId)
+        );
       }
       return { previousQuests };
     },
@@ -66,28 +59,27 @@ export function useQuests(filters: QuestFilters = {}) {
     },
   });
 
-  // Complete Quest Mutation with Optimistic UI
   const completeMutation = useMutation({
     mutationFn: (id: string) =>
-      api.post<QuestCompletionResponse>(`/api/quests/${id}/complete`),
+      api.post<{
+        leveledUp: boolean;
+        newLevel: number;
+        newTotalXP: number;
+        xpForNextLevel: number;
+        currentStreak: number;
+        longestStreak: number;
+      }>(`/api/xp/complete-task/${id}`),
     onMutate: async (completedId) => {
       await queryClient.cancelQueries({ queryKey: ["quests"] });
-      await queryClient.cancelQueries({ queryKey: ["character"] });
-
-      const previousQuests = queryClient.getQueryData<{ success: boolean; quests: QuestItem[] }>([
-        "quests",
-        filters,
-      ]);
-
+      const previousQuests = queryClient.getQueryData<QuestItem[]>(["quests", filters]);
       if (previousQuests) {
-        queryClient.setQueryData(["quests", filters], {
-          ...previousQuests,
-          quests: previousQuests.quests.map((q) =>
-            q.id === completedId ? { ...q, status: "COMPLETED" as const } : q
-          ),
-        });
+        queryClient.setQueryData(
+          ["quests", filters],
+          previousQuests.map((q) =>
+            q.id === completedId ? { ...q, status: "completed" as const } : q
+          )
+        );
       }
-
       return { previousQuests };
     },
     onError: (err, completedId, context) => {
@@ -95,19 +87,15 @@ export function useQuests(filters: QuestFilters = {}) {
         queryClient.setQueryData(["quests", filters], context.previousQuests);
       }
     },
-    onSuccess: (data) => {
-      // Authoritatively update character and invalidate queries
-      queryClient.setQueryData(["character"], {
-        success: true,
-        character: data.character,
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quests"] });
+      queryClient.invalidateQueries({ queryKey: ["character"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 
   return {
-    quests: query.data?.quests || [],
+    quests: query.data || [],
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

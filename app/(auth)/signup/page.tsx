@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Mail, Lock, User, Eye, EyeOff, ArrowRight, Sun, Moon } from "lucide-react";
+import { signup } from "@/lib/auth";
 import { api } from "@/lib/api-client";
 import { playSound } from "@/lib/sound";
 import { useAppPreferences } from "@/components/providers";
@@ -33,7 +34,6 @@ export default function SignupPage() {
       setIsLoading(false);
       return;
     }
-
     if (password.length < 6) {
       setError("Security key must be at least 6 characters.");
       setIsLoading(false);
@@ -41,12 +41,8 @@ export default function SignupPage() {
     }
 
     try {
-      await api.post("/api/auth/register", {
-        username,
-        email,
-        password,
-      });
-
+      await signup(email, password);
+      await api.post("/api/auth/init-profile");
       playSound("levelup");
       router.push("/dashboard");
     } catch (err: unknown) {
@@ -59,18 +55,12 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col items-center justify-center p-4 selection:bg-[var(--primary)] selection:text-[#FFFFFF] relative overflow-hidden transition-colors duration-200">
-      {/* Ambient radial glow – sits below card */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--primary)]/15 rounded-full blur-3xl pointer-events-none" style={{ zIndex: 1 }} />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[var(--accent-active)]/12 rounded-full blur-3xl pointer-events-none" style={{ zIndex: 1 }} />
 
-      {/* Signup Card */}
       <div className="relative w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-panel)] backdrop-blur-xl p-6 sm:p-8 shadow-2xl transition-colors duration-200" style={{ zIndex: 10 }}>
-        {/* Top bar with quick theme toggle */}
         <div className="flex items-center justify-between mb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 group"
-          >
+          <Link href="/" className="inline-flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[var(--primary)] via-[var(--accent-active)] to-[var(--gold)] p-0.5 shadow-md group-hover:scale-105 transition-transform">
               <div className="w-full h-full bg-[var(--surface-panel)] rounded-[10px] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-[var(--accent-active)]" />
@@ -85,18 +75,12 @@ export default function SignupPage() {
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title={isLight ? "Switch to Dark Theme" : "Switch to Light Theme"}
             className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent-active)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
           >
-            {isLight ? (
-              <Sun className="w-4 h-4 text-[var(--primary)]" />
-            ) : (
-              <Moon className="w-4 h-4 text-[var(--accent-active)]" />
-            )}
+            {isLight ? <Sun className="w-4 h-4 text-[var(--primary)]" /> : <Moon className="w-4 h-4 text-[var(--accent-active)]" />}
           </button>
         </div>
 
-        {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-black font-mono tracking-tight text-[var(--text-primary)]">
             OPERATIVE RECRUITMENT
@@ -106,23 +90,15 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Error Alert */}
         {error && (
-          <div
-            role="alert"
-            className="p-3.5 rounded-xl bg-[var(--error)]/15 border border-[var(--error)]/40 text-[var(--error)] text-xs mb-5 animate-in fade-in"
-          >
+          <div role="alert" className="p-3.5 rounded-xl bg-[var(--error)]/15 border border-[var(--error)]/40 text-[var(--error)] text-xs mb-5 animate-in fade-in">
             ⚠ {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="username"
-              className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5"
-            >
+            <label htmlFor="username" className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               Operative Codename *
             </label>
             <div className="relative">
@@ -140,10 +116,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="email"
-              className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5"
-            >
+            <label htmlFor="email" className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               Uplink Email *
             </label>
             <div className="relative">
@@ -161,10 +134,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5"
-            >
+            <label htmlFor="password" className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               Security Key (Min. 6 chars) *
             </label>
             <div className="relative">
@@ -184,20 +154,13 @@ export default function SignupPage() {
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
               >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5"
-            >
+            <label htmlFor="confirmPassword" className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               Confirm Security Key *
             </label>
             <div className="relative">
@@ -214,29 +177,13 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Primary Submit Button: Orange on Light, Specular Violet on Dark */}
           {isLight ? (
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full py-3 px-4 rounded-xl text-sm font-mono font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md mt-2"
-            >
+            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 px-4 rounded-xl text-sm font-mono font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md mt-2">
               <span>{isLoading ? "Enlisting Operative..." : "Initialize Operative Sheet"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <SpecularButton
-              type="submit"
-              disabled={isLoading}
-              size="md"
-              radius={12}
-              lineColor="#A855F7"
-              baseColor="#6D28D9"
-              textColor="#F8FAFC"
-              intensity={1.2}
-              autoAnimate
-              className="w-full mt-2"
-            >
+            <SpecularButton type="submit" disabled={isLoading} size="md" radius={12} lineColor="#A855F7" baseColor="#6D28D9" textColor="#F8FAFC" intensity={1.2} autoAnimate className="w-full mt-2">
               <span className="flex items-center justify-center gap-2">
                 <span>{isLoading ? "Enlisting Operative..." : "Initialize Operative Sheet"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -247,10 +194,7 @@ export default function SignupPage() {
 
         <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] text-center text-xs text-[var(--text-muted)]">
           Already registered?{" "}
-          <Link
-            href="/login"
-            className="text-[var(--accent-active)] hover:underline font-bold font-mono"
-          >
+          <Link href="/login" className="text-[var(--accent-active)] hover:underline font-bold font-mono">
             Connect Neural Link
           </Link>
         </div>
