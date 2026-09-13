@@ -1,0 +1,118 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String             @id @default(cuid())
+  username     String             @unique
+  email        String             @unique
+  passwordHash String
+  avatarUrl    String             @default("cyber-avatar-1")
+  createdAt    DateTime           @default(now())
+  character    Character?
+  quests       Quest[]
+  completions  QuestCompletion[]
+  inventory    InventoryItem[]
+  achievements Achievement[]
+}
+
+model Character {
+  id               String      @id @default(cuid())
+  userId           String      @unique
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level            Int         @default(1)
+  currentXP        Int         @default(0)
+  totalXP          Int         @default(0)
+  gold             Int         @default(150)
+  streakCurrent    Int         @default(1)
+  streakBest       Int         @default(1)
+  lastActivityDate String?     // Format: YYYY-MM-DD
+  soundEnabled     Boolean     @default(true)
+  reducedMotion    Boolean     @default(false)
+  attributes       Attribute[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model Attribute {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  name        String    // STRENGTH, INTELLECT, VITALITY, DISCIPLINE
+  value       Int       @default(10)
+  todayGains  Int       @default(0)
+
+  @@unique([characterId, name])
+}
+
+model Quest {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  category    String            // Coding, Study, Fitness, Health, Reading, Mindfulness, Work, Personal, Other
+  attribute   String            // STRENGTH, INTELLECT, VITALITY, DISCIPLINE
+  difficulty  Int               @default(1) // 1 to 5 stars
+  xpReward    Int               @default(50)
+  goldReward  Int               @default(20)
+  frequency   String            @default("ONCE") // ONCE, DAILY, WEEKLY
+  dueDate     String?           // Format: YYYY-MM-DD
+  status      String            @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  completions QuestCompletion[]
+}
+
+model QuestCompletion {
+  id               String   @id @default(cuid())
+  questId          String
+  quest            Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedAt      DateTime @default(now())
+  xpGranted        Int
+  goldGranted      Int
+  attributeGranted String
+  attributeAmount  Int      @default(1)
+}
+
+model ShopItem {
+  id          String          @id @default(cuid())
+  name        String
+  category    String          // FEATURED, THEMES, BADGES, COSMETICS, BOOSTERS
+  rarity      String          // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
+  priceGold   Int
+  description String
+  icon        String          // Lucide icon key or avatar identifier
+  effect      String?
+  inventory   InventoryItem[]
+}
+
+model InventoryItem {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopItemId String
+  shopItem   ShopItem @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
+  equipped   Boolean  @default(false)
+  acquiredAt DateTime @default(now())
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeKey    String
+  title       String
+  description String
+  icon        String
+  unlockedAt  DateTime @default(now())
+
+  @@unique([userId, badgeKey])
+}

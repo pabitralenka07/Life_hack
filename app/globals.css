@@ -1,0 +1,357 @@
+@import "tailwindcss";
+
+/* ─── TWO-THEME COLOR SYSTEM: ARCANE OBSIDIAN & SUNLIT GUILD ─── */
+
+:root,
+[data-theme="dark"],
+.dark {
+  /* DARK THEME — “Arcane Obsidian” */
+  --theme-mode: dark;
+  --bg-app: #0B0A12;
+  --bg-subtle: #100E1A;
+  --surface-panel: #141224;
+  --surface-card: #1A172E;
+  --surface-hover: #221E3C;
+  --border-subtle: #252233;
+  --border-active: #A855F7;
+
+  /* Primary purple & active states */
+  --primary-purple: #6D28D9;
+  --primary-hover: #7C3AED;
+  --primary-btn-bg: #6D28D9;
+  --primary-btn-hover: #7C3AED;
+  --primary-btn-text: #FFFFFF;
+  --primary-glow: rgba(109, 40, 217, 0.35);
+
+  --bright-violet: #A855F7;
+  --accent-active: #A855F7;
+  --accent-glow: rgba(168, 85, 247, 0.35);
+
+  /* XP / magical progress (violet) */
+  --xp-progress: #A855F7;
+  --xp-glow: rgba(168, 85, 247, 0.40);
+
+  /* Gold / currency / rewards */
+  --gold-reward: #F59E0B;
+  --gold-highlight: #FCD34D;
+  --gold-glow: rgba(245, 158, 11, 0.35);
+
+  /* Typography */
+  --text-primary: #F8FAFC;
+  --text-muted: #A1A1AA;
+  --text-secondary: #C4B5FD;
+
+  /* Feedback */
+  --success: #22C55E;
+  --error: #EF4444;
+
+  /* Background Glow Gradient */
+  --body-bg-gradient:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(109, 40, 217, 0.16), transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.08), transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(109, 40, 217, 0.08), transparent 50%);
+
+  /* Legacy aliases for backward compatibility */
+  --obsidian: var(--bg-app);
+  --purple-magic: var(--primary-purple);
+  --violet-accent: var(--bright-violet);
+  --amber-gold: var(--gold-reward);
+  --light-gold: var(--gold-highlight);
+  --border-panel: var(--border-subtle);
+  --bg: var(--bg-app);
+  --surface: var(--surface-panel);
+  --surface-border: var(--border-subtle);
+  --surface-border-active: var(--border-active);
+  --accent-primary: var(--primary-purple);
+  --accent-primary-glow: var(--primary-glow);
+  --accent-secondary: var(--bright-violet);
+  --accent-secondary-glow: var(--accent-glow);
+  --xp: var(--xp-progress);
+  --gold: var(--gold-reward);
+  --danger: var(--error);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"],
+.light {
+  /* LIGHT THEME — “Sunlit Guild” */
+  --theme-mode: light;
+  --bg-app: #FFF9D8;
+  --bg-subtle: #FFFDF0;
+  --surface-panel: #FFFFFF;
+  --surface-card: #FFFEF7;
+  --surface-hover: #FFF3C4;
+  --border-subtle: #E8DEB4;
+  --border-active: #F59E0B;
+
+  /* Primary orange & active states */
+  --primary-purple: #FF8500;
+  --primary-hover: #E07400;
+  --primary-btn-bg: #FF8500;
+  --primary-btn-hover: #E07400;
+  --primary-btn-text: #FFFFFF;
+  --primary-glow: rgba(255, 133, 0, 0.30);
+
+  --bright-violet: #F59E0B;
+  --accent-active: #F59E0B;
+  --accent-glow: rgba(245, 158, 11, 0.30);
+
+  /* XP / magical progress (violet in light mode) */
+  --xp-progress: #6D28D9;
+  --xp-glow: rgba(109, 40, 217, 0.25);
+
+  /* Gold / currency / rewards */
+  --gold-reward: #D97706;
+  --gold-highlight: #F59E0B;
+  --gold-glow: rgba(217, 119, 6, 0.25);
+
+  /* Typography */
+  --text-primary: #241B35;
+  --text-muted: #6B6472;
+  --text-secondary: #584D6B;
+
+  /* Feedback */
+  --success: #15803D;
+  --error: #DC2626;
+
+  /* Background Glow Gradient */
+  --body-bg-gradient:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 133, 0, 0.08), transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(245, 158, 11, 0.05), transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(255, 133, 0, 0.05), transparent 50%);
+
+  /* Legacy aliases for backward compatibility */
+  --obsidian: var(--bg-app);
+  --purple-magic: var(--primary-purple);
+  --violet-accent: var(--bright-violet);
+  --amber-gold: var(--gold-reward);
+  --light-gold: var(--gold-highlight);
+  --border-panel: var(--border-subtle);
+  --bg: var(--bg-app);
+  --surface: var(--surface-panel);
+  --surface-border: var(--border-subtle);
+  --surface-border-active: var(--border-active);
+  --accent-primary: var(--primary-purple);
+  --accent-primary-glow: var(--primary-glow);
+  --accent-secondary: var(--bright-violet);
+  --accent-secondary-glow: var(--accent-glow);
+  --xp: var(--xp-progress);
+  --gold: var(--gold-reward);
+  --danger: var(--error);
+
+  color-scheme: light;
+}
+
+/* ─── BODY & BASE ELEMENTS ─── */
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  background-image: var(--body-bg-gradient);
+  background-attachment: fixed;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ─── SEMANTIC REUSABLE UTILITIES ─── */
+.bg-theme-app      { background-color: var(--bg-app); }
+.bg-theme-subtle   { background-color: var(--bg-subtle); }
+.bg-theme-panel    { background-color: var(--surface-panel); }
+.bg-theme-card     { background-color: var(--surface-card); }
+.bg-theme-hover:hover { background-color: var(--surface-hover); }
+
+.border-theme        { border-color: var(--border-subtle); }
+.border-theme-active { border-color: var(--border-active); }
+
+.text-theme-primary   { color: var(--text-primary); }
+.text-theme-muted     { color: var(--text-muted); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-xp        { color: var(--xp-progress); }
+.text-theme-gold      { color: var(--gold-reward); }
+
+/* Primary Button Class (violet in dark mode, orange in light mode, always white text) */
+.btn-primary {
+  background-color: var(--primary-btn-bg);
+  color: var(--primary-btn-text) !important;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px -2px var(--primary-glow);
+}
+.btn-primary:hover {
+  background-color: var(--primary-btn-hover);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cyber Panel Styles */
+.cyber-panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.cyber-panel-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-panel-card:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px -5px var(--primary-glow);
+}
+
+.glow-purple {
+  box-shadow: 0 0 25px -3px var(--primary-glow);
+}
+
+.glow-violet {
+  box-shadow: 0 0 25px -3px var(--accent-glow);
+}
+
+.glow-xp {
+  box-shadow: 0 0 20px -2px var(--xp-glow);
+}
+
+.glow-gold {
+  box-shadow: 0 0 20px -2px var(--gold-glow);
+}
+
+/* ─── SCROLLBAR THEME INTEGRATION ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-purple);
+}
+
+/* ─── LIGHT THEME SELECTOR MAPPINGS ─── */
+/* Ensures existing arbitrary color classes automatically adapt seamlessly to Sunlit Guild */
+[data-theme="light"],
+.light {
+  /* App backgrounds */
+  .bg-\[\#0B0A12\],
+  .bg-\[\#0b0a12\] {
+    background-color: var(--bg-app) !important;
+  }
+  .bg-\[\#0B0A12\]\/95,
+  .bg-\[\#0B0A12\]\/90,
+  .bg-\[\#0B0A12\]\/85,
+  .bg-\[\#0B0A12\]\/80,
+  .bg-\[\#0B0A12\]\/70,
+  .bg-\[\#0B0A12\]\/60 {
+    background-color: rgba(255, 249, 216, 0.92) !important;
+  }
+
+  /* Subtle background */
+  .bg-\[\#100E1A\],
+  .bg-\[\#0f0e1a\],
+  .bg-\[\#100e1a\] {
+    background-color: var(--bg-subtle) !important;
+  }
+  .bg-\[\#100E1A\]\/90 {
+    background-color: rgba(255, 253, 240, 0.95) !important;
+  }
+
+  /* Surface panel */
+  .bg-\[\#141224\],
+  .bg-\[\#141222\] {
+    background-color: var(--surface-panel) !important;
+  }
+
+  /* Raised cards */
+  .bg-\[\#1A172E\],
+  .bg-\[\#18152A\],
+  .bg-\[\#1a172e\],
+  .bg-\[\#18152a\] {
+    background-color: var(--surface-card) !important;
+  }
+
+  /* Hover surfaces */
+  .hover\:bg-\[\#141222\]:hover,
+  .hover\:bg-\[\#18152A\]:hover,
+  .hover\:bg-\[\#1A172E\]:hover {
+    background-color: var(--surface-hover) !important;
+  }
+
+  /* Borders */
+  .border-\[\#252233\],
+  .border-\[\#252233\]\/60,
+  .border-\[\#252233\]\/50,
+  .border-\[\#252233\]\/40 {
+    border-color: var(--border-subtle) !important;
+  }
+
+  /* Text */
+  .text-\[\#F8FAFC\],
+  .text-\[\#f8fafc\] {
+    color: var(--text-primary) !important;
+  }
+  .text-\[\#A1A1AA\],
+  .text-\[\#a1a1aa\] {
+    color: var(--text-muted) !important;
+  }
+  .text-\[\#F8FAFC\]\/80,
+  .text-\[\#F8FAFC\]\/70 {
+    color: var(--text-primary) !important;
+  }
+
+  /* Gold & XP adjustments for contrast in light mode */
+  .text-\[\#F59E0B\] {
+    color: var(--gold-reward) !important;
+  }
+  .text-\[\#A855F7\] {
+    color: var(--xp-progress) !important;
+  }
+  .border-\[\#A855F7\]\/50,
+  .border-\[\#A855F7\]\/40,
+  .border-\[\#A855F7\]\/30 {
+    border-color: rgba(109, 40, 217, 0.4) !important;
+  }
+  .bg-\[\#6D28D9\]\/20,
+  .bg-\[\#6D28D9\]\/15,
+  .bg-\[\#6D28D9\]\/10 {
+    background-color: rgba(255, 133, 0, 0.12) !important;
+  }
+  .bg-\[\#F59E0B\]\/15,
+  .bg-\[\#F59E0B\]\/10 {
+    background-color: rgba(217, 119, 6, 0.12) !important;
+  }
+  .border-\[\#F59E0B\]\/30 {
+    border-color: rgba(217, 119, 6, 0.3) !important;
+  }
+  .bg-\[\#141224\]\/90,
+  .bg-\[\#141222\]\/90 {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* ─── REDUCED MOTION OVERRIDE ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
