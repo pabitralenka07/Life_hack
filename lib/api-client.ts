@@ -1,6 +1,7 @@
 import { auth } from "@/lib/firebase";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://life-hack-backend.onrender.com";
 
 export class ApiError extends Error {
   status: number;
